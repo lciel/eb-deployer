@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'eb/deployer'
+
+Eb::Deployer::CLI.start
