@@ -19,9 +19,9 @@ module Eb::Deployer
         environment_names: [environment_name]
       )
       if ret[:environments].length == 1
-        puts ret[:environments][0].cname
+        print ret[:environments][0].cname
       else
-        puts ''
+        print ''
       end
     end
 
@@ -32,9 +32,9 @@ module Eb::Deployer
         environment_names: [environment_name]
       )
       if ret[:environments].length == 1
-        puts true
+        print true
       else
-        puts false
+        print false
       end
     end
 
@@ -53,7 +53,7 @@ module Eb::Deployer
       params.store(:template_name, template_name) if template_name
       params.store(:option_settings, option_settings) if option_settings
       ret = client.create_environment(params)
-      puts ret[:environment_id]
+      print ret[:environment_id]
     end
 
     desc 'status environment_name', 'Get status by target environment name'
@@ -62,7 +62,7 @@ module Eb::Deployer
         application_name: application_name,
         environment_names: [environment_name]
       )
-      puts ret[:environments][0].to_hash.to_json
+      print ret[:environments][0].to_hash.to_json
     end
 
     private
