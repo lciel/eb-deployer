@@ -42,6 +42,7 @@ module Eb::Deployer
     option :tier
     option :cname
     option :option_settings_file
+    option :option_settings
     desc 'start environment_name', 'Start an environment'
     def start(environment_name)
       params = {
@@ -150,13 +151,18 @@ module Eb::Deployer
     end
 
     def option_settings
-      option_file = fetch_attribute(:option_settings_file, false)
-      return nil unless option_file
-      if File.exist?(option_file)
-        return(eval(File.read(option_file)))
-      else
-        raise Exception.new "#{option_file} is not found."
+      options = fetch_attribute(:option_settings, false)
+      unless options
+        option_file = fetch_attribute(:option_settings_file, false)
+        return nil unless option_file
+        if File.exist?(option_file)
+          options = File.read(option_file)
+        else
+          raise Exception.new "#{option_file} is not found."
+        end
       end
+      return nil unless options
+      eval(options)
     end
 
     def tier
