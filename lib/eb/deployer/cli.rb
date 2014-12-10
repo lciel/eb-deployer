@@ -58,14 +58,67 @@ module Eb::Deployer
 
     desc 'status environment_name', 'Get status by target environment name'
     def status(environment_name)
+      print status_value(environment_name).to_hash.to_json
+    end
+
+    option :timeout
+    desc 'wait_up environment_name', 'Wait environment ready and green'
+    def wait_up(environment_name)
+      start_time = Time.now
+      t = 1200
+      t = timeout if timeout != 0
+
+      interval = 5
+      counter = request_failed = health_failed = 0
+
+      request_failed_limit = 3
+      health_failed_limit = 5
+      timeout_count_limit = t / interval
+
+      loop do
+        st = status_value(environment_name)
+
+        if st.nil?
+          request_failed += 1
+          if request_failed > request_failed_limit
+            puts "\nFailed to up #{environment_name}: Environment not found"
+            exit 1
+          end
+          puts "Environment not found: count: #{request_failed}"
+        else
+          break if st.status.downcase == 'ready' && st.health.downcase == 'green'
+          unless st.status.downcase == 'launching'
+            puts "\nFailed to up #{environment_name}: Unexpected status: #{st.status}"
+            exit 1
+          end
+          health_failed += 1 if st.health.downcase == 'red' || st.health.downcase == 'yellow'
+          if health_failed > health_failed_limit
+            puts "\nFailed to up #{environment_name}: Bad health: #{st.health}"
+            exit 1
+          end
+        end
+
+        if counter >= timeout_count_limit
+          puts "\nFailed to up #{environment_name}: Timeout"
+          exit 1
+        end
+
+        counter += 1
+        print '.'
+        sleep interval
+      end
+      puts "\nSuccess to up #{environment_name}! (#{(Time.now - start_time).to_i} sec)"
+    end
+
+    private
+
+    def status_value(environment_name)
       ret = client.describe_environments(
         application_name: application_name,
         environment_names: [environment_name]
       )
-      print ret[:environments][0].to_hash.to_json
+      ret[:environments][0]
     end
-
-    private
 
     def access_key_id
       fetch_attribute(:access_key_id)
@@ -89,6 +142,11 @@ module Eb::Deployer
 
     def cname
       fetch_attribute(:cname, false)
+    end
+
+    def timeout
+      t = fetch_attribute(:timeout, false)
+      t.to_i
     end
 
     def option_settings
