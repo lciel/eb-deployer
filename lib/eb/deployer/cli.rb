@@ -25,6 +25,19 @@ module Eb::Deployer
       end
     end
 
+    desc 'get_endpoint_url target_environment', 'Get an endpoint url by target environment name'
+    def get_endpoint_url(environment_name)
+      ret = client.describe_environments(
+        application_name: application_name,
+        environment_names: [environment_name]
+      )
+      if ret[:environments].length == 1
+        print ret[:environments][0].endpoint_url
+      else
+        print ''
+      end
+    end
+
     desc 'check_exist target_environment', 'Get true if exist target environment name'
     def check_exist(environment_name)
       ret = client.describe_environments(
