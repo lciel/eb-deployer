@@ -45,7 +45,11 @@ module Eb::Deployer
         environment_names: [environment_name]
       )
       if ret[:environments].length == 1
-        print true
+        if ret[:environments][0].status.downcase = 'terminated'
+          print false
+        else
+          print true
+        end
       else
         print false
       end
