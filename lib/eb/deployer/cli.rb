@@ -101,13 +101,13 @@ module Eb::Deployer
           puts "Environment not found: count: #{request_failed}"
         else
           break if st.status.downcase == 'ready' && st.health.downcase == 'green'
-          unless st.status.downcase == 'launching'
-            puts "\nFailed to up #{environment_name}: Unexpected status: #{st.status}"
+          unless st.status.downcase == 'launching' || st.status.downcase == 'ready'
+            puts "\nFailed to up #{environment_name}: Unexpected status: #{st.status}, health: #{st.health}"
             exit 1
           end
           health_failed += 1 if st.health.downcase == 'red' || st.health.downcase == 'yellow'
           if health_failed > health_failed_limit
-            puts "\nFailed to up #{environment_name}: Bad health: #{st.health}"
+            puts "\nFailed to up #{environment_name}: Bad health: #{st.health}, status: #{st.status}"
             exit 1
           end
         end
