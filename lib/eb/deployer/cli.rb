@@ -71,7 +71,7 @@ module Eb::Deployer
       params.store(:tier, tier) if tier
       params.store(:template_name, template_name) if template_name
       params.store(:option_settings, option_settings) if option_settings
-      if tags && tags.is_a(Array)
+      if tags && tags.is_a?(Array)
         tag_array = []
         tags.each do |tag|
           key, value = tag.split(':')
@@ -189,6 +189,10 @@ module Eb::Deployer
       end
       return nil unless options
       eval(options)
+    end
+
+    def tags
+      fetch_attribute(:tags, false)
     end
 
     def tier
