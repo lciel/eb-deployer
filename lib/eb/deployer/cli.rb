@@ -60,6 +60,7 @@ module Eb::Deployer
     option :cname
     option :option_settings_file
     option :option_settings
+    option :tags, type: :array
     desc 'start environment_name', 'Start an environment'
     def start(environment_name)
       params = {
@@ -70,6 +71,14 @@ module Eb::Deployer
       params.store(:tier, tier) if tier
       params.store(:template_name, template_name) if template_name
       params.store(:option_settings, option_settings) if option_settings
+      if tags && tags.is_a(Array)
+        tag_array = []
+        tags.each do |tag|
+          key, value = tag.split(':')
+          tag_array.push({ key: key, value: value })
+        end
+        params.store(:tags, tag_array) if tag_array.length > 0
+      end
       ret = client.create_environment(params)
       print ret[:environment_id]
     end
